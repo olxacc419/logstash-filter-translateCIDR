@@ -35,7 +35,7 @@ require_relative "array_of_maps_value_update"
 # you might consider using the gsub function of the mutate filter.
 module LogStash module Filters
 class TranslateCIDR < LogStash::Filters::Base
-  config_name "translatecidr"
+  config_name "translateCIDR"
 
   # The name of the logstash event field containing the value to be compared for a
   # match by the translate filter (e.g. `message`, `host`, `response_code`).
