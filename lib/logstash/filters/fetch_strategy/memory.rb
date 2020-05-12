@@ -22,7 +22,7 @@ module LogStash module Filters module FetchStrategy module Memory
         @dictionary = dictionary
         @dictionary.keys.each{|k| @keys_cidr[k] = IPAddr.new(k.strip)}
         #Sort dictionnary
-        @keys_cidr = @keys_cidr.sort.to_h 
+        @keys_cidr = @keys_cidr.sort_by {|k,v| v}.to_h 
     end
 
     def binary_search_recursive(ip_hash, ip)
@@ -42,19 +42,23 @@ module LogStash module Filters module FetchStrategy module Memory
               return ip_array[i]
           else
               comp_result = ip<=>ip_hash[ip_array[i]]
+              @sub_hash_key = Hash.new()
               if comp_result == 1
-                  return binary_search_recursive(ip_hash[ip_array[i+1, last]], ip)
+                  ip_array[i+1, last].each { |k| @sub_hash_key[k] = ip_hash[k] }
+                  #return binary_search_recursive(ip_hash[ip_array[i+1, last]], ip)
               else
-                  return binary_search_recursive(ip_hash[ip_array[first, i]], ip)
+                  ip_array[first, i].each { |k| @sub_hash_key[k] = ip_hash[k] }
+                  #return binary_search_recursive(ip_hash[ip_array[first, i]], ip)
               end
+              return binary_search_recursive(@sub_hash_key, ip)
           end
       end
     end
 
     def fetch(source, results)
       begin
-        if !(IPAddr.new(source) rescue nil).nil?  
-          ip = IPAddr.new(source)
+        if !(IPAddr.new(source.strip) rescue nil).nil?  
+          ip = IPAddr.new(source.strip)
           key = binary_search_recursive(@keys_cidr, ip)
           if key.nil?
             results[0] = false
