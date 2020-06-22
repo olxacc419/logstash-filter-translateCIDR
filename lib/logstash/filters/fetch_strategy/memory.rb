@@ -38,19 +38,21 @@ module LogStash module Filters module FetchStrategy module Memory
           return nil
       else
           i = (first + last) / 2
-          if ip_hash[ip_array[i]].include?(ip)
+		  if ip_array[i].nil? || ip_hash[ip_array[i]].nil? 
+			  return nil
+          elsif ip_hash[ip_array[i]].include?(ip)
               return ip_array[i]
           else
               comp_result = ip<=>ip_hash[ip_array[i]]
-              @sub_hash_key = Hash.new()
+              sub_hash_key = Hash.new()
               if comp_result == 1
-                  ip_array[i+1, last].each { |k| @sub_hash_key[k] = ip_hash[k] }
+                  ip_array[i+1, last].each { |k| sub_hash_key[k] = ip_hash[k] }
                   #return binary_search_recursive(ip_hash[ip_array[i+1, last]], ip)
               else
-                  ip_array[first, i].each { |k| @sub_hash_key[k] = ip_hash[k] }
+                  ip_array[first, i].each { |k| sub_hash_key[k] = ip_hash[k] }
                   #return binary_search_recursive(ip_hash[ip_array[first, i]], ip)
               end
-              return binary_search_recursive(@sub_hash_key, ip)
+              return binary_search_recursive(sub_hash_key, ip)
           end
       end
     end
